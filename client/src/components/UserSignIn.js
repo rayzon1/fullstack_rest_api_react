@@ -66,6 +66,7 @@ export default class UserSignIn extends Component {
   // Uses context action signIn to sign-in a authenticated user, if successfull will push to /authenticated route.
   submit = () => {
     const { context } = this.props;
+    const { from } = this.props.location.state || { from: { pathname: '/authenticated' } };
     const { username, password } = this.state;
     context.actions.signIn(username, password)
       .then(user => {
@@ -74,7 +75,7 @@ export default class UserSignIn extends Component {
             return { errors: [ 'Sign-in was unsuccessful' ] };
           })
         } else {
-          this.props.history.push('/authenticated');
+          this.props.history.push(from);
           console.log(`SUCCESS! ${username} is now signed in!`);
         }
       })

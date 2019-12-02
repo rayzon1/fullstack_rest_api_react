@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Data from './Data';
+import Cookies from 'js-cookie';
 
 const Context = React.createContext(); 
 
@@ -11,7 +12,8 @@ export class Provider extends Component {
   }
 
   state = {
-    authenticatedUser: null,
+    // Will make auth user the cookie if present otherwise null.
+    authenticatedUser: Cookies.getJSON('authenticatedUser') || null,
   };
 
   render() {
@@ -22,6 +24,7 @@ export class Provider extends Component {
       data: this.data,
       actions: {
         signIn: this.signIn,
+        signOut: this.signOut,
       }
     };  
 
@@ -34,6 +37,7 @@ export class Provider extends Component {
 
   // Signs in user with required credentials.
   signIn = async (username, password) => {
+    // User retrieved from the db.
     const user = await this.data.getUser(username, password);
     if (user !== null) {
       this.setState(() => {
@@ -41,12 +45,19 @@ export class Provider extends Component {
           authenticatedUser: user,
         };
       });
+
+      //! Set the cookie using js-cookie. 
+      //! First param is name of cookie.
+      Cookies.set('authenticatedUser', JSON.stringify(user), { expires: 1 });
+
     }
     return user;
   }
 
   signOut = () => {
-
+    this.setState({ authenticatedUser: null });
+    // Deletes cookie holding auth user credentials.
+    Cookies.remove('authenticatedUser');
   }
 }
 
